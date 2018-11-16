@@ -6,12 +6,7 @@ import {
 }
 from 'spinalgraph';
 import SpinalBIMObject from 'spinal-models-bimobject'
-import {
-  resolve
-} from 'url';
-import {
-  promises
-} from 'fs';
+
 
 let bimObjectService = {
   "getGraph": async function getGraph() {
