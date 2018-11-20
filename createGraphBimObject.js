@@ -42,7 +42,7 @@ let bimObjectService = {
       BIMObjectContext.addChildInContext(myBIMObjNode, "hasBIMObject",
         SPINAL_RELATION_LST_PTR_TYPE, BIMObjectContext)
     } else {
-      let myContext = new SpinalContext("BIMObject");
+      let myContext = new SpinalContext("BIMObjectContext");
       myGraph.addContext(myContext);
       myContext.addRelationName("hasBIMObject");
       myContext.addChildInContext(myBIMObjNode, "hasBIMObject",
@@ -56,7 +56,7 @@ let bimObjectService = {
   "getBIMObject": async function getBIMObject(dbid) {
 
     let myGraph = await bimObjectService.getGraph();
-    let BIMObjectContext = await myGraph.getContext("BIMObject");
+    let BIMObjectContext = await myGraph.getContext("BIMObjectContext");
     if (BIMObjectContext != undefined) {
       let BIMObjectArray = await BIMObjectContext.getChildren([
         "hasBIMObject"
@@ -72,14 +72,27 @@ let bimObjectService = {
     } else {
       return undefined;
     }
-    // if (myGraph.BIMObjects.length != 0) {
-    //   for (let i = 0; i < myGraph.BIMObjects.length; i++) {
-    //     const myBIMObject = myGraph.BIMObjects[i];
-    //     if (dbid === myBIMObject.info.dbid.get()) {}
-    //   }
-    // } else {
-    //   return null;
-    // }
+  },
+  "addBIMObject": async function addBIMObject(context, node, dbid,name) {
+    console.log(context)
+    console.log(node)
+    console.log(dbid)
+    if (dbid instanceof SpinalNode) {
+      node.addChildInContext(dbid, "hasBIMObject",
+      SPINAL_RELATION_LST_PTR_TYPE, context)
+      return dbid;
+    } else {
+      let myBIMObjNode = bimObjectService.getBIMObject(dbid);
+      if (myBIMObjNode != undefined){
+        node.addChildInContext(myBIMObjNode, "hasBIMObject",
+        SPINAL_RELATION_LST_PTR_TYPE, context)
+        return myBIMObjNode;
+      } else {
+        let myBIMObjNode = await bimObjectService.createBIMObject(dbid, name);
+        node.addChildInContext(myBIMObjNode, "hasBIMObject", SPINAL_RELATION_LST_PTR_TYPE, context)
+        return myBIMObjNode;
+      }
+    }
   }
 }
 module.exports = bimObjectService;
