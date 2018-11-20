@@ -8,5 +8,10 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "spinal-models-bimobject": "https://github.com/spinalcom/spinal-models-bimobject.git",
+    "spinalgraph": "https://github.com/spinalcom/spinal-model-graph.git",
+    "vue": "^2.0.1"
+  }
 }
