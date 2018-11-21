@@ -37,7 +37,7 @@ let bimObjectService = {
     } else {
       let myContext = new SpinalContext("BIMObjectContext");
       myGraph.addContext(myContext);
-      myContext.addRelationName("hasBIMObject");
+      myContext.addRelationNames("hasBIMObject");
       myContext.addChildInContext(myBIMObjNode, "hasBIMObject",
         SPINAL_RELATION_LST_PTR_TYPE, BIMObjectContext)
 
