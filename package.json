@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "spinal-models-bimobject": "https://github.com/spinalcom/spinal-models-bimobject.git"
+    "spinal-models-bimobject": "https://github.com/spinalcom/spinal-models-bimobject.git",
     "vue": "^2.0.1"
   }
 }
