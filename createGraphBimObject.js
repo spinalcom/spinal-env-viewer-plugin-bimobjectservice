@@ -51,11 +51,11 @@ let bimObjectService = {
         SPINAL_RELATION_PTR_LST_TYPE,
         BIMObjectContext
       );
-      console.log(myBIMObjNode);
+      //console.log(myBIMObjNode);
 
       return myBIMObjNode;
     } else {
-      console.log(myBIMObjNode);
+      //console.log(myBIMObjNode);
       return myBIMObjNode;
     }
 
