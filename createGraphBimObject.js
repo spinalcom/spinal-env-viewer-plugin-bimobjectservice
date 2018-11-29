@@ -35,7 +35,7 @@ let bimObjectService = {
     return this.context;
   },
   async createBIMObject(dbid, name) {
-    let myBIMObjNode = await this.getBIMObject(dbid)
+    let myBIMObjNode = await this.getBIMObject(dbid);
     if (myBIMObjNode == undefined) {
       let myBIMObj = new SpinalBIMObject(dbid, name);
       myBIMObjNode = new SpinalNode(name, 'BIMObject', myBIMObj);
@@ -51,17 +51,14 @@ let bimObjectService = {
         SPINAL_RELATION_PTR_LST_TYPE,
         BIMObjectContext
       );
-      //console.log(myBIMObjNode);
 
       return myBIMObjNode;
     } else {
-      //console.log(myBIMObjNode);
       return myBIMObjNode;
     }
 
   },
   async getBIMObject(dbid) {
-    let myGraph = await this.getGraph();
     let BIMObjectContext = await this.getContext('BIMObjectContext');
 
     if (typeof BIMObjectContext !== 'undefined') {
@@ -80,8 +77,6 @@ let bimObjectService = {
     }
   },
   async addBIMObject(context, node, dbid, name) {
-    console.log('dbid');
-
     if (dbid instanceof SpinalNode) {
       await node.addChildInContext(
         dbid,
@@ -92,7 +87,6 @@ let bimObjectService = {
       return dbid;
     } else {
       let myBIMObjNode = await this.getBIMObject(dbid);
-      console.log(myBIMObjNode);
       if (typeof myBIMObjNode !== 'undefined') {
         await node.addChildInContext(
           myBIMObjNode,
