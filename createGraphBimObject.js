@@ -88,12 +88,16 @@ let bimObjectService = {
     } else {
       let myBIMObjNode = await this.getBIMObject(dbid);
       if (typeof myBIMObjNode !== 'undefined') {
-        await node.addChildInContext(
-          myBIMObjNode,
-          'hasBIMObject',
-          SPINAL_RELATION_PTR_LST_TYPE,
-          context
-        );
+        let childrenIds = node.getChildrenIds();
+
+        if (!childrenIds.includes(myBIMObjNode.getId().get())) {
+          await node.addChildInContext(
+            myBIMObjNode,
+            'hasBIMObject',
+            SPINAL_RELATION_PTR_LST_TYPE,
+            context
+          );
+        }
         return myBIMObjNode;
       } else {
         let myBIMObjNode = await this.createBIMObject(dbid, name);
