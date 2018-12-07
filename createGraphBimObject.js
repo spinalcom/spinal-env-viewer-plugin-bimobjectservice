@@ -1,6 +1,5 @@
 import {
   SPINAL_RELATION_PTR_LST_TYPE,
-  SpinalContext,
   SpinalGraphService,
   SpinalNode,
 } from 'spinal-env-viewer-graph-service';
@@ -22,7 +21,7 @@ let bimObjectService = {
       this.context = SpinalGraphService.getContext( 'BIMObjectContext' );
 
       if (typeof this.context === 'undefined') {
-        this.context = new SpinalGraphService.addContext('BIMObjectContext');
+        this.context = SpinalGraphService.addContext( 'BIMObjectContext' );
       }
     }
     return this.context;
