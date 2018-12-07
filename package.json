@@ -10,8 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "spinal-env-viewer-graph-service": "git+https://github.com/spinalcom/Spinal-Graph-Service.git",
     "spinal-models-bimobject": "https://github.com/spinalcom/spinal-models-bimobject.git",
-     "spinalgraph": "git+https://github.com/spinalcom/spinal-model-graph.git#v01",
     "vue": "^2.0.1"
   }
 }
