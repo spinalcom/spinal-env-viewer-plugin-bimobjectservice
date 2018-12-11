@@ -29,7 +29,7 @@ let bimObjectService = {
 
       if (typeof this.context === 'undefined') {
         this.context = new SpinalContext('BIMObjectContext');
-        graph.addContext(this.context);
+        await graph.addContext(this.context);
       }
     }
     return this.context;
