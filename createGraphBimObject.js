@@ -76,42 +76,42 @@ let bimObjectService = {
       return undefined;
     }
   },
-  async addBIMObject(context, node, dbid, name) {
-    if (dbid instanceof SpinalNode) {
-      await node.addChildInContext(
-        dbid,
-        'hasBIMObject',
-        SPINAL_RELATION_PTR_LST_TYPE,
-        context
-      );
-      return dbid;
-    } else {
-      let myBIMObjNode = await this.getBIMObject(dbid);
-      if (typeof myBIMObjNode !== 'undefined') {
-        let childrenIds = node.getChildrenIds();
+async addBIMObject(context, node, dbid, name) {
+   console.log('dbid');
 
-        if (!childrenIds.includes(myBIMObjNode.getId().get())) {
-          await node.addChildInContext(
-            myBIMObjNode,
-            'hasBIMObject',
-            SPINAL_RELATION_PTR_LST_TYPE,
-            context
-          );
-        }
-        return myBIMObjNode;
-      } else {
-        let myBIMObjNode = await this.createBIMObject(dbid, name);
+   if (dbid instanceof SpinalNode) {
+     await node.addChildInContext(
+       dbid,
+       'hasBIMObject',
+       SPINAL_RELATION_PTR_LST_TYPE,
+       context
+     );
+     return dbid;
+   } else {
+     let myBIMObjNode = await this.getBIMObject(dbid);
+     console.log(myBIMObjNode);
+     if (typeof myBIMObjNode !== 'undefined') {
+       console.log(node)
+       await node.addChildInContext(
+         myBIMObjNode,
+         'hasBIMObject',
+         SPINAL_RELATION_PTR_LST_TYPE,
+         context
+       );
+       return myBIMObjNode;
+     } else {
+       let myBIMObjNode = await this.createBIMObject(dbid, name);
 
-        await node.addChildInContext(
-          myBIMObjNode,
-          'hasBIMObject',
-          SPINAL_RELATION_PTR_LST_TYPE,
-          context
-        );
-        return myBIMObjNode;
-      }
-    }
-  },
+       await node.addChildInContext(
+         myBIMObjNode,
+         'hasBIMObject',
+         SPINAL_RELATION_PTR_LST_TYPE,
+         context
+       );
+       return myBIMObjNode;
+     }
+   }
+ }
 };
 
 export default bimObjectService;
