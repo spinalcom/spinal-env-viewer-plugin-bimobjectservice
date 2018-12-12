@@ -6,32 +6,45 @@ import {
 } from 'spinal-model-graph';
 import SpinalBIMObject from 'spinal-models-bimobject';
 
+async function createGraph() {
+  let forgeFile = await window.spinal.spinalSystem.getModel();
+
+  if (!forgeFile.hasOwnProperty('graph')) {
+    forgeFile.add_attr({
+      graph: new SpinalGraph(),
+    });
+  }
+
+  return forgeFile.graph;
+}
+
+async function createContext() {
+  const graph = await this.getGraph();
+  let context = await graph.getContext('BIMObjectContext');
+
+  if (context === undefined) {
+    context = new SpinalContext('BIMObjectContext');
+    await graph.addContext(context);
+  }
+
+  return context;
+}
+
 let bimObjectService = {
   graph: null,
   context: null,
-  async getGraph() {
+  getGraph() {
     if (this.graph === null) {
-      let forgeFile = await window.spinal.spinalSystem.getModel();
-
-      if (!forgeFile.hasOwnProperty('graph')) {
-        forgeFile.add_attr({
-          graph: new SpinalGraph(),
-        });
-      }
-      this.graph = forgeFile.graph;
+      this.graph = createGraph();
     }
+
     return this.graph;
   },
-  async getContext() {
+  getContext() {
     if (this.context === null) {
-      let graph = await this.getGraph();
-      this.context = await graph.getContext('BIMObjectContext');
-
-      if (typeof this.context === 'undefined') {
-        this.context = new SpinalContext('BIMObjectContext');
-        await graph.addContext(this.context);
-      }
+      this.context = createContext.call(this);
     }
+
     return this.context;
   },
   async createBIMObject(dbid, name) {
@@ -56,7 +69,6 @@ let bimObjectService = {
     } else {
       return myBIMObjNode;
     }
-
   },
   async getBIMObject(dbid) {
     let BIMObjectContext = await this.getContext('BIMObjectContext');
@@ -76,42 +88,38 @@ let bimObjectService = {
       return undefined;
     }
   },
-async addBIMObject(context, node, dbid, name) {
-   console.log('dbid');
+  async addBIMObject(context, node, dbid, name) {
+    if (dbid instanceof SpinalNode) {
+      await node.addChildInContext(
+        dbid,
+        'hasBIMObject',
+        SPINAL_RELATION_PTR_LST_TYPE,
+        context
+      );
+      return dbid;
+    } else {
+      let myBIMObjNode = await this.getBIMObject(dbid);
+      if (typeof myBIMObjNode !== 'undefined') {
+        await node.addChildInContext(
+          myBIMObjNode,
+          'hasBIMObject',
+          SPINAL_RELATION_PTR_LST_TYPE,
+          context
+        );
+        return myBIMObjNode;
+      } else {
+        let myBIMObjNode = await this.createBIMObject(dbid, name);
 
-   if (dbid instanceof SpinalNode) {
-     await node.addChildInContext(
-       dbid,
-       'hasBIMObject',
-       SPINAL_RELATION_PTR_LST_TYPE,
-       context
-     );
-     return dbid;
-   } else {
-     let myBIMObjNode = await this.getBIMObject(dbid);
-     console.log(myBIMObjNode);
-     if (typeof myBIMObjNode !== 'undefined') {
-       console.log(node)
-       await node.addChildInContext(
-         myBIMObjNode,
-         'hasBIMObject',
-         SPINAL_RELATION_PTR_LST_TYPE,
-         context
-       );
-       return myBIMObjNode;
-     } else {
-       let myBIMObjNode = await this.createBIMObject(dbid, name);
-
-       await node.addChildInContext(
-         myBIMObjNode,
-         'hasBIMObject',
-         SPINAL_RELATION_PTR_LST_TYPE,
-         context
-       );
-       return myBIMObjNode;
-     }
-   }
- }
+        await node.addChildInContext(
+          myBIMObjNode,
+          'hasBIMObject',
+          SPINAL_RELATION_PTR_LST_TYPE,
+          context
+        );
+        return myBIMObjNode;
+      }
+    }
+  }
 };
 
 export default bimObjectService;
