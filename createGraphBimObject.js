@@ -119,6 +119,20 @@ let bimObjectService = {
         return myBIMObjNode;
       }
     }
+  },
+  removeBIMObject(parent, child) {
+    return parent.removeChild(child, "hasBIMObject", SPINAL_RELATION_PTR_LST_TYPE);
+  },
+  async deleteBIMObject(dbId) {
+    const context = await this.getContext();
+    const children = await context.getChildrenInContext();
+    const child = children.find(node => node.info.dbId === dbId);
+
+    if (child === undefined) {
+      throw Error("The dbId as no BIM object");
+    }
+
+    return child.removeFromGraph();
   }
 };
 
