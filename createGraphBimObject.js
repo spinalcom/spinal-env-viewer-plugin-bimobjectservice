@@ -88,51 +88,27 @@ let bimObjectService = {
       return undefined;
     }
   },
-  async addBIMObject(context, node, dbid, name) {
-    if (dbid instanceof SpinalNode) {
-      await node.addChildInContext(
-        dbid,
-        'hasBIMObject',
-        SPINAL_RELATION_PTR_LST_TYPE,
-        context
-      );
-      return dbid;
-    } else {
-      let myBIMObjNode = await this.getBIMObject(dbid);
-      if (typeof myBIMObjNode !== 'undefined') {
-        await node.addChildInContext(
-          myBIMObjNode,
-          'hasBIMObject',
-          SPINAL_RELATION_PTR_LST_TYPE,
-          context
-        );
-        return myBIMObjNode;
-      } else {
-        let myBIMObjNode = await this.createBIMObject(dbid, name);
+  async addBIMObject(context, parent, dbId, name) {
+    let node;
 
-        await node.addChildInContext(
-          myBIMObjNode,
-          'hasBIMObject',
-          SPINAL_RELATION_PTR_LST_TYPE,
-          context
-        );
-        return myBIMObjNode;
+    if (dbId instanceof SpinalNode) {
+      node = dbId;
+    } else {
+      node = await this.getBIMObject(dbId);
+
+      if (node === undefined) {
+        node = await this.createBIMObject(dbId, name);
       }
     }
-  },
-  removeBIMObject(parent, child) {
-    return parent.removeChild(child, "hasBIMObject", SPINAL_RELATION_PTR_LST_TYPE);
-  },
-  async deleteBIMObject(dbId) {
-    const context = await this.getContext();
-    const children = await context.getChildrenInContext();
-    const child = children.find(node => node.info.dbId === dbId);
 
-    if (child === undefined) {
-      throw Error("The dbId as no BIM object");
-    }
+    await parent.addChildInContext(
+      node,
+      'hasBIMObject',
+      SPINAL_RELATION_PTR_LST_TYPE,
+      context
+    );
 
-    return child.removeFromGraph();
+    return node;
   }
 };
 
