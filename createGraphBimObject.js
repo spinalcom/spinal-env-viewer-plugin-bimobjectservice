@@ -121,7 +121,7 @@ let bimObjectService = {
     const child = children.find(node => node.info.dbId === dbId);
 
     if (child === undefined) {
-      throw Error("The dbId as no BIM object");
+      throw Error("The dbId has no BIM object");
     }
 
     return child.removeFromGraph();
