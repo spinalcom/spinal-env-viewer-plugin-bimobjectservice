@@ -6,8 +6,13 @@ import {
 } from "spinal-model-graph";
 import SpinalBIMObject from "spinal-models-bimobject";
 
+const BIM_OBJECT_CONTEXT_TYPE = "BIMObjectContext";
+const BIM_OBJECT_NODE_TYPE = "BIMObject";
+const BIM_OBJECT_RELATION_NAME = "hasBIMObject";
+const REFERENCE_OBJECT_RELATION_NAME = "hasReferenceObject";
+
 async function createGraph() {
-  let forgeFile = await window.spinal.spinalSystem.getModel();
+  const forgeFile = await window.spinal.spinalSystem.getModel();
 
   if (!forgeFile.hasOwnProperty("graph")) {
     forgeFile.add_attr({
@@ -20,10 +25,10 @@ async function createGraph() {
 
 async function createContext() {
   const graph = await this.getGraph();
-  let context = await graph.getContext("BIMObjectContext");
+  let context = await graph.getContext(BIM_OBJECT_CONTEXT_TYPE);
 
   if (context === undefined) {
-    context = new SpinalContext("BIMObjectContext");
+    context = new SpinalContext(BIM_OBJECT_CONTEXT_TYPE);
     await graph.addContext(context);
   }
 
@@ -51,7 +56,7 @@ let bimObjectService = {
     let myBIMObjNode = await this.getBIMObject(dbid);
     if (myBIMObjNode == undefined) {
       let myBIMObj = new SpinalBIMObject(dbid, name);
-      myBIMObjNode = new SpinalNode(name, "BIMObject", myBIMObj);
+      myBIMObjNode = new SpinalNode(name, BIM_OBJECT_NODE_TYPE, myBIMObj);
       myBIMObjNode.info.add_attr({
         dbid: dbid
       });
@@ -60,7 +65,7 @@ let bimObjectService = {
 
       await BIMObjectContext.addChildInContext(
         myBIMObjNode,
-        "hasBIMObject",
+        BIM_OBJECT_RELATION_NAME,
         SPINAL_RELATION_PTR_LST_TYPE,
         BIMObjectContext
       );
@@ -71,10 +76,10 @@ let bimObjectService = {
     }
   },
   async getBIMObject(dbid) {
-    let BIMObjectContext = await this.getContext("BIMObjectContext");
+    let BIMObjectContext = await this.getContext(BIM_OBJECT_CONTEXT_TYPE);
 
     if (typeof BIMObjectContext !== "undefined") {
-      let BIMObjectArray = await BIMObjectContext.getChildren(["hasBIMObject"]);
+      let BIMObjectArray = await BIMObjectContext.getChildren([BIM_OBJECT_RELATION_NAME]);
 
       for (let i = 0; i < BIMObjectArray.length; i++) {
         const element = BIMObjectArray[i];
@@ -101,7 +106,7 @@ let bimObjectService = {
 
     await parent.addChildInContext(
       node,
-      "hasBIMObject",
+      BIM_OBJECT_RELATION_NAME,
       SPINAL_RELATION_PTR_LST_TYPE,
       context
     );
@@ -111,7 +116,7 @@ let bimObjectService = {
   removeBIMObject(parent, child) {
     return parent.removeChild(
       child,
-      "hasBIMObject",
+      BIM_OBJECT_RELATION_NAME,
       SPINAL_RELATION_PTR_LST_TYPE
     );
   },
@@ -125,7 +130,36 @@ let bimObjectService = {
     }
 
     return child.removeFromGraph();
-  }
+  },
+  async addReferenceObject(context, parent, dbId, name) {
+    let node;
+
+    if (dbId instanceof SpinalNode) {
+      node = dbId;
+    } else {
+      node = await this.getBIMObject(dbId);
+
+      if (node === undefined) {
+        node = await this.createBIMObject(dbId, name);
+      }
+    }
+
+    await parent.addChildInContext(
+      node,
+      REFERENCE_OBJECT_RELATION_NAME,
+      SPINAL_RELATION_PTR_LST_TYPE,
+      context
+    );
+
+    return node;
+  },
+  removeReferenceObject(parent, child) {
+    return parent.removeChild(
+      child,
+      REFERENCE_OBJECT_RELATION_NAME,
+      SPINAL_RELATION_PTR_LST_TYPE
+    );
+  },
 };
 
 export default bimObjectService;
