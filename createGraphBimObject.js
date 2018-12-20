@@ -158,4 +158,12 @@ const bimObjectService = {
   }
 };
 
+bimObjectService.constants = {
+  BIM_OBJECT_CONTEXT_TYPE,
+  BIM_OBJECT_NODE_TYPE,
+  BIM_OBJECT_RELATION_NAME,
+  REFERENCE_OBJECT_RELATION_NAME,
+  BIM_OBJECT_RELATION_TYPE
+};
+
 export default bimObjectService;
