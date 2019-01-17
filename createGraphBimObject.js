@@ -3,7 +3,7 @@ import {
   SpinalContext,
   SpinalNode,
   SPINAL_RELATION_PTR_LST_TYPE
-} from "spinal-model-graph";
+} from "spinal-env-viewer-graph-service";
 import SpinalBIMObject from "spinal-models-bimobject";
 
 const BIM_OBJECT_CONTEXT_TYPE = "BIMObjectContext";
