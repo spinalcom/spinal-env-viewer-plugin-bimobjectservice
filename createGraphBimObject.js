@@ -1,10 +1,10 @@
 import {
-  SpinalGraph,
-  SpinalContext,
   SpinalNode,
-  SPINAL_RELATION_PTR_LST_TYPE
+  SPINAL_RELATION_PTR_LST_TYPE,
+  SpinalGraphService
 } from "spinal-env-viewer-graph-service";
 import SpinalBIMObject from "spinal-models-bimobject";
+import { assemblyManagerService } from "spinal-service-assembly-manager";
 
 const BIM_OBJECT_CONTEXT_TYPE = "BIMObjectContext";
 const BIM_OBJECT_NODE_TYPE = "BIMObject";
@@ -12,150 +12,91 @@ const BIM_OBJECT_RELATION_NAME = "hasBIMObject";
 const REFERENCE_OBJECT_RELATION_NAME = "hasReferenceObject";
 const BIM_OBJECT_RELATION_TYPE = SPINAL_RELATION_PTR_LST_TYPE;
 
-async function createGraph() {
-  const forgeFile = await window.spinal.spinalSystem.getModel();
-
-  if (!forgeFile.hasOwnProperty("graph")) {
-    forgeFile.add_attr({
-      graph: new SpinalGraph()
-    });
-  }
-
-  return forgeFile.graph;
-}
-
-async function createContext() {
-  const graph = await this.getGraph();
-  let context = await graph.getContext(BIM_OBJECT_CONTEXT_TYPE);
-
-  if (context === undefined) {
-    context = new SpinalContext(BIM_OBJECT_CONTEXT_TYPE);
-    await graph.addContext(context);
-  }
-
-  return context;
-}
-
+const assemblyManger =  assemblyManagerService;
 const bimObjectService = {
-  graph: null,
-  context: null,
-  getGraph() {
-    if (this.graph === null) {
-      this.graph = createGraph();
-    }
-
-    return this.graph;
+  createBIMObject(dbid, name) {
+    return assemblyManger.createBimObj(dbid, name, AssemblyManagerService._getCurrentModel())
   },
-  getContext() {
-    if (this.context === null) {
-      this.context = createContext.call(this);
-    }
-
-    return this.context;
-  },
-  async createBIMObject(dbid, name) {
-    let BIMObjNode = await this.getBIMObject(dbid);
-
-    if (BIMObjNode === undefined) {
-      const BIMObject = new SpinalBIMObject(dbid, name);
-
-      BIMObjNode = new SpinalNode(name, BIM_OBJECT_NODE_TYPE, BIMObject);
-      BIMObjNode.info.add_attr({
-        dbid: dbid
+  
+  getBIMObject(dbid) {
+    console.log('getBimObject', dbid);
+    return assemblyManger.getBimObjectFromViewer(dbid, AssemblyManagerService._getCurrentModel())
+      .then(bimObj => {
+        if (bimObj) {
+          console.log( 'bimObj', bimObj);
+          return SpinalGraphService.getRealNode(bimObj.id);
+        }
+        return undefined;
       });
-
-      const BIMObjectContext = await this.getContext();
-
-      await BIMObjectContext.addChildInContext(
-        BIMObjNode,
-        BIM_OBJECT_RELATION_NAME,
-        BIM_OBJECT_RELATION_TYPE,
-        BIMObjectContext
-      );
-    }
-
-    return BIMObjNode;
   },
-  async getBIMObject(dbid) {
-    const BIMObjectContext = await this.getContext(BIM_OBJECT_CONTEXT_TYPE);
-    const BIMObjectArray = await BIMObjectContext.getChildren([
-      BIM_OBJECT_RELATION_NAME
-    ]);
-
-    for (let BIMObject of BIMObjectArray) {
-      if (BIMObject.info.dbid.get() === dbid) {
-        return BIMObject;
-      }
-    }
+  
+  addBIMObject(context, parent, dbId, name) {
+    console.log('add to parent')
+    return this.getBIMObject(dbId)
+      .then(bimObject => {
+        console.log('then get bim object',bimObject);
+        if (bimObject) {
+          return SpinalGraphService.addChildInContext(
+            parent.info.id.get(), bimObject.info.id.get(), context.info.id.get()
+            , BIM_OBJECT_RELATION_NAME, BIM_OBJECT_RELATION_TYPE,
+          )
+        }
+        return assemblyManger.createBimObj(dbId, name, AssemblyManagerService._getCurrentModel())
+          .then(
+            (bimObj) => {
+              console.log('create then',bimObj);
+              return this.addBIMObject(context, parent, dbId, name);
+            }
+          )
+      }).catch(e => {console.error(e)})
   },
-  async addBIMObject(context, parent, dbId, name) {
-    let node;
-
-    if (dbId instanceof SpinalNode) {
-      node = dbId;
-    } else {
-      node = await this.getBIMObject(dbId);
-
-      if (node === undefined) {
-        node = await this.createBIMObject(dbId, name);
-      }
-    }
-
-    await parent.addChildInContext(
-      node,
-      BIM_OBJECT_RELATION_NAME,
-      BIM_OBJECT_RELATION_TYPE,
-      context
-    );
-
-    return node;
-  },
+  
   removeBIMObject(parent, child) {
-    return parent.removeChild(
-      child,
+    SpinalGraphService.removeChild(
+      parent.info.id.get(),
+      child.info.id.get(),
       BIM_OBJECT_RELATION_NAME,
       BIM_OBJECT_RELATION_TYPE
     );
   },
-  async deleteBIMObject(dbId) {
-    const context = await this.getContext();
-    const children = await context.getChildrenInContext();
-    const child = children.find(node => node.info.dbId === dbId);
-
-    if (child === undefined) {
-      throw Error("The dbId has no BIM object");
-    }
-
-    return child.removeFromGraph();
+  
+  deleteBIMObject(dbId) {
+    return this.getBIMObject(dbId).then(
+      (BIMobj) => {
+        if (BIMobj)
+          return SpinalGraphService.removeFromGraph(BIMobj.info.id.get());
+        // @ts-ignore
+        throw Error("The dbId has no BIM object");
+      }
+    )
+    
   },
+  
   async addReferenceObject(parent, dbId, name) {
+    
     let node;
-
+    
     if (dbId instanceof SpinalNode) {
       node = dbId;
     } else {
       node = await this.getBIMObject(dbId);
-
+      
       if (node === undefined) {
+        
         node = await this.createBIMObject(dbId, name);
       }
     }
-
-    await parent.addChild(
-      node,
-      REFERENCE_OBJECT_RELATION_NAME,
-      BIM_OBJECT_RELATION_TYPE
-    );
-
+    
+    SpinalGraphService
+      .addChild(parent.info.id.get(), node.info.id.get(),
+        REFERENCE_OBJECT_RELATION_NAME,
+        BIM_OBJECT_RELATION_TYPE);
     return node;
   },
+  
   removeReferenceObject(parent, child) {
-    return parent.removeChild(
-      child,
-      REFERENCE_OBJECT_RELATION_NAME,
-      BIM_OBJECT_RELATION_TYPE
-    );
-  }
+    return this.removeBIMObject(parent, child)
+  },
 };
 
 bimObjectService.constants = {

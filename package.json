@@ -1,10 +1,9 @@
 {
   "name": "spinal-env-viewer-plugin-bimobjectservice",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "build/createGraphBimObject.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "babel createGraphBimObject.js -d  build -s inline"
   },
   "keywords": [],
@@ -18,6 +17,7 @@
   "dependencies": {
     "spinal-env-viewer-graph-service": "git+https://github.com/spinalcom/Spinal-Graph-Service.git",
     "spinal-models-bimobject": "https://github.com/spinalcom/spinal-models-bimobject.git",
+    "spinal-service-assembly-manager": "git+https://github.com/spinalcom/spinal-service-assembly-manager.git",
     "vue": "^2.0.1"
   }
 }
