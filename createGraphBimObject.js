@@ -15,12 +15,12 @@ const BIM_OBJECT_RELATION_TYPE = SPINAL_RELATION_PTR_LST_TYPE;
 const assemblyManger =  assemblyManagerService;
 const bimObjectService = {
   createBIMObject(dbid, name) {
-    return assemblyManger.createBimObj(dbid, name, AssemblyManagerService._getCurrentModel())
+    return assemblyManger.createBimObj(dbid, name, assemblyManger._getCurrentModel())
   },
   
   getBIMObject(dbid) {
-    console.log('getBimObject', dbid);
-    return assemblyManger.getBimObjectFromViewer(dbid, AssemblyManagerService._getCurrentModel())
+    console.log('getBimObject', assemblyManger);
+    return assemblyManger.getBimObjectFromViewer(dbid, assemblyManger._getCurrentModel())
       .then(bimObj => {
         if (bimObj) {
           console.log( 'bimObj', bimObj);
@@ -41,7 +41,7 @@ const bimObjectService = {
             , BIM_OBJECT_RELATION_NAME, BIM_OBJECT_RELATION_TYPE,
           )
         }
-        return assemblyManger.createBimObj(dbId, name, AssemblyManagerService._getCurrentModel())
+        return assemblyManger.createBimObj(dbId, name, assemblyManger._getCurrentModel())
           .then(
             (bimObj) => {
               console.log('create then',bimObj);
