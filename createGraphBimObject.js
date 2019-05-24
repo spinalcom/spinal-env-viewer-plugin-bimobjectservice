@@ -3,7 +3,6 @@ import {
   SPINAL_RELATION_PTR_LST_TYPE,
   SpinalGraphService
 } from "spinal-env-viewer-graph-service";
-import SpinalBIMObject from "spinal-models-bimobject";
 import { assemblyManagerService } from "spinal-service-assembly-manager";
 
 const BIM_OBJECT_CONTEXT_TYPE = "BIMObjectContext";
@@ -14,6 +13,11 @@ const BIM_OBJECT_RELATION_TYPE = SPINAL_RELATION_PTR_LST_TYPE;
 
 const assemblyManger =  assemblyManagerService;
 const bimObjectService = {
+  
+  getGraph(){
+    return SpinalGraphService.getGraph();
+  },
+  
   createBIMObject(dbid, name) {
     return assemblyManger.createBimObj(dbid, name, assemblyManger._getCurrentModel())
   },
