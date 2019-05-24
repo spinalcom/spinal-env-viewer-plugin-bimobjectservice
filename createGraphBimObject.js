@@ -19,7 +19,6 @@ const bimObjectService = {
   },
   
   getBIMObject(dbid) {
-    console.log('getBimObject', assemblyManger);
     return assemblyManger.getBimObjectFromViewer(dbid, assemblyManger._getCurrentModel())
       .then(bimObj => {
         if (bimObj) {
@@ -31,10 +30,8 @@ const bimObjectService = {
   },
   
   addBIMObject(context, parent, dbId, name) {
-    console.log('add to parent')
     return this.getBIMObject(dbId)
       .then(bimObject => {
-        console.log('then get bim object',bimObject);
         if (bimObject) {
           return SpinalGraphService.addChildInContext(
             parent.info.id.get(), bimObject.info.id.get(), context.info.id.get()
